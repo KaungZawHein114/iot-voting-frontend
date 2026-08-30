@@ -1,6 +1,6 @@
 // src/pages/thankyouPage.jsx
 
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaCheck } from "react-icons/fa6";
 import { HiOutlineArrowLeft, HiOutlineHome } from "react-icons/hi2";
 
@@ -10,20 +10,14 @@ import thankYouImage from "../assets/thankyouPeople.jpg";
 
 function ThankYouPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
+  const location = useLocation();
+  const batch = location.state?.batch;
 
-  const handleFinish = () => {
-    // If coming from public voting flow, go back to welcome
-    if (token) {
-      navigate("/welcome");
-    } else {
-      navigate("/");
-    }
-  };
+  const handleFinish = () => navigate("/");
 
   const handleBackToEvent = () => {
-    navigate(-1);
+    if (batch) navigate(`/projects/${batch}`);
+    else navigate("/");
   };
 
   return (
@@ -45,9 +39,9 @@ function ThankYouPage() {
           </p>
 
           <p className="thank-you-description">
-            Thank you for taking part in
+            Thank you for taking part{batch ? ` in ${batch}` : ""}.
             <br />
-            the IoT Show 2026.
+            You've completed voting — there's nothing more to do here.
           </p>
 
           <div className="thank-you-image-section">
@@ -70,15 +64,17 @@ function ThankYouPage() {
             <span>Finish</span>
           </button>
 
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={handleBackToEvent}
-          >
-            <HiOutlineArrowLeft className="button-icon" aria-hidden="true" />
+          {batch && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleBackToEvent}
+            >
+              <HiOutlineArrowLeft className="button-icon" aria-hidden="true" />
 
-            <span>Back to Event Info</span>
-          </button>
+              <span>Back to Show Info</span>
+            </button>
+          )}
         </div>
 
         <footer className="voting-footer">

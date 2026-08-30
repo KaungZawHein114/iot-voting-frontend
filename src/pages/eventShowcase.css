@@ -24,8 +24,10 @@
 .showcase-card__image { position:relative; margin:5px; aspect-ratio:16/10; overflow:hidden; border-radius:18px; }
 .showcase-card__image::after { content:''; position:absolute; inset:0; background:linear-gradient(to top,rgba(10,15,36,.5),transparent 62%); }
 .showcase-card__image img { width:100%; height:100%; object-fit:cover; transition:transform .5s ease; }.showcase-card:hover img { transform:scale(1.045); }
+.showcase-card__image--placeholder { display:flex; align-items:flex-end; background:linear-gradient(135deg,var(--color-primary),#8c63ef); }
+.showcase-card__batch { padding:14px 16px; font-size:1.4rem; font-weight:800; letter-spacing:-.03em; color:#fff; }
 .showcase-status { display:inline-flex; align-items:center; gap:7px; padding:6px 10px; border-radius:99px; font-size:.65rem; font-weight:750; letter-spacing:.03em; }
-.showcase-card .showcase-status { position:absolute; z-index:2; left:13px; top:13px; color:#fff; backdrop-filter:blur(10px); }.showcase-status--active { background:rgba(0,158,117,.84); }.showcase-status--upcoming { background:rgba(44,66,139,.82); }
+.showcase-card .showcase-status { position:absolute; z-index:2; left:13px; top:13px; color:#fff; backdrop-filter:blur(10px); }.showcase-status--active { background:rgba(0,158,117,.84); }.showcase-status--upcoming { background:rgba(44,66,139,.82); }.showcase-status--closed { background:rgba(90,96,122,.82); }
 .showcase-card__body { flex:1; display:flex; flex-direction:column; gap:20px; padding:18px; }.showcase-card h3 { font-size:1.05rem; letter-spacing:-.02em; }.showcase-card__body p { margin-top:4px; color:var(--color-text-secondary); font-size:.78rem; }
 .showcase-meta { display:grid; grid-template-columns:1fr 1fr; gap:10px; color:var(--color-text-secondary); font-size:.7rem; }
 .showcase-meta div,.event-detail__meta div { display:flex; align-items:center; gap:7px; min-width:0; }.showcase-meta svg,.event-detail__meta svg { flex:0 0 auto; color:var(--color-primary); }.showcase-meta span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }

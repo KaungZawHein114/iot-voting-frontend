@@ -1,321 +1,190 @@
-import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import gustoLogo from "../assets/gusto-logo.png";
-import heroImg from "../assets/hero.png";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FiChevronDown } from "react-icons/fi";
+import { HiOutlineArrowLeft } from "react-icons/hi2";
+
 import "./votingPage.css";
+import gustoLogo from "../assets/gusto-logo.png";
+import { getBallot, submitVote } from "../api/voting";
+import { getErrorMessage } from "../api/client";
+import LoadingState from "../components/LoadingState";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
-const categories = [
-  {
-    id: "innovation",
-    icon: "💡",
-    title: "Innovation",
-    question: "Which group has the most innovative idea?",
+const ACCESS_MESSAGES = {
+  NO_ACCESS: {
+    title: "Voting access required",
+    body: "Scan the live QR code displayed at the show to enter voting.",
   },
-  {
-    id: "design",
-    icon: "🎨",
-    title: "Design",
-    question: "Which Project has the best design?",
+  EXPIRED: {
+    title: "Voting access expired",
+    body: "This voting chance is no longer valid. Scan the current QR code if voting is still open.",
   },
-  {
-    id: "functionality",
-    icon: "⚙️",
-    title: "Functionality",
-    question: "Which project works most effectively?",
+  CLOSED: {
+    title: "Voting is closed",
+    body: "This voting session can no longer submit a vote.",
   },
-  {
-    id: "impact",
-    icon: "🌍",
-    title: "Impact",
-    question: "Which project could have the greatest impact?",
+  VOTED: {
+    title: "Vote submitted",
+    body: "Your selections have been recorded. This voting session cannot vote again.",
   },
-];
-
-// Fallback mock data if API is not available
-const groupsByCategory = {
-  innovation: [
-    { id: "inn-1", name: "Group-1", team: "AI Smart City Team" },
-    { id: "inn-2", name: "Group-2", team: "Autonomous Drone Team" },
-    { id: "inn-3", name: "Group-3", team: "Green Energy Grid" },
-    { id: "inn-4", name: "Group-4", team: "AR Medical Assistant" },
-    { id: "inn-5", name: "Group-5", team: "Eco Plastic Recycler" },
-  ],
-  design: [
-    { id: "des-1", name: "Group-1", team: "UI/UX Redesign Team" },
-    { id: "des-2", name: "Group-2", team: "3D Product Modeling" },
-    { id: "des-3", name: "Group-3", team: "Minimalist Brand Kit" },
-    { id: "des-4", name: "Group-4", team: "Interactive Dashboard" },
-    { id: "des-5", name: "Group-5", team: "Creative Motion Design" },
-  ],
-  functionality: [
-    { id: "func-1", name: "Group-1", team: "Smart Home Automation" },
-    { id: "func-2", name: "Group-2", team: "High-Speed DBMS" },
-    { id: "func-3", name: "Group-3", team: "Real-time Chat Engine" },
-    { id: "func-4", name: "Group-4", team: "E-Commerce Gateway" },
-    { id: "func-5", name: "Group-5", team: "Automated Testing Bot" },
-  ],
-  impact: [
-    { id: "imp-1", name: "Group-1", team: "Clean Water Filter Tech" },
-    { id: "imp-2", name: "Group-2", team: "Disaster Alert System" },
-    { id: "imp-3", name: "Group-3", team: "Solar Grid Optimizer" },
-    { id: "imp-4", name: "Group-4", team: "EduTech for Rural Areas" },
-    { id: "imp-5", name: "Group-5", team: "Waste Management Network" },
-  ],
 };
 
-function ChevronIcon({ open }) {
+function AccessScreen({ pageState, batch }) {
+  const navigate = useNavigate();
+  const message = ACCESS_MESSAGES[pageState] || ACCESS_MESSAGES.NO_ACCESS;
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`vote-chevron${open ? " vote-chevron--open" : ""}`}
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
+    <div className="vote-page">
+      <div className="vote-page__main" style={{ paddingTop: 64, textAlign: "center" }}>
+        <h1 className="vote-page__title">{message.title}</h1>
+        <p className="vote-page__subtitle" style={{ marginTop: 12 }}>{message.body}</p>
+        <button
+          type="button"
+          className="vote-submit-btn"
+          style={{ marginTop: 32 }}
+          onClick={() => navigate(`/projects/${batch}`)}
+        >
+          View groups instead
+        </button>
+      </div>
+    </div>
   );
 }
 
 export default function VotingPage() {
+  const { batch } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [openId, setOpenId] = useState(null);
-  const [selections, setSelections] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [allGroups, setAllGroups] = useState([]);
 
-  // Get token from URL params (from public voting flow)
-  const token = searchParams.get("token");
+  const [ballot, setBallot] = useState(null); // raw API payload
+  const [loadError, setLoadError] = useState(null);
+  const [selections, setSelections] = useState({}); // categoryId -> groupId
+  const [openCategory, setOpenCategory] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
-  useEffect(() => {
-    // Load groups from backend
-    const loadGroups = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/public-show/groups`);
-        if (response.data?.data?.groups) {
-          setAllGroups(response.data.data.groups);
-        }
-      } catch (err) {
-        console.warn(
-          "Could not load groups from API, using fallback data:",
-          err.message,
-        );
-        // Use fallback data
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadBallot = () => {
+    setBallot(null);
+    setLoadError(null);
+    getBallot(batch)
+      .then((data) => {
+        setBallot(data);
+        if (data.categories.length > 0) setOpenCategory(data.categories[0].id);
+      })
+      .catch((err) => setLoadError(getErrorMessage(err, "Couldn't load the ballot.")));
+  };
 
-    loadGroups();
-  }, []);
+  useEffect(loadBallot, [batch]);
 
-  const allAnswered = categories.every((c) => selections[c.id]);
+  const allAnswered = useMemo(() => {
+    if (!ballot) return false;
+    return ballot.categories.every((category) => Boolean(selections[category.id]));
+  }, [ballot, selections]);
 
-  const handleVoteSubmit = async () => {
-    if (!allAnswered || isSubmitting) return;
-    setIsSubmitting(true);
-    setError("");
+  const handleSelect = (categoryId, groupId) => {
+    setSelections((prev) => ({ ...prev, [categoryId]: groupId }));
+  };
 
+  const handleSubmit = async () => {
+    if (!allAnswered || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
     try {
-      // If token exists, this is a public voting flow via backend
-      if (token) {
-        // Submit to backend public voting endpoint
-        const response = await axios.post(
-          `${API_URL}/public-voting/votes`,
-          {
-            group: selections.innovation, // Use one of the selections (backend will handle the full vote)
-            votes: selections, // Send all selections
-          },
-          {
-            headers: {
-              "x-vote-csrf": token, // Include token in header if needed
-            },
-          },
-        );
-
-        if (response.status === 200 || response.status === 201) {
-          setSubmitted(true);
-          setTimeout(() => {
-            navigate("/thank-you?token=" + encodeURIComponent(token));
-          }, 500);
-        }
-      } else {
-        // Local demo mode - just show thank you
-        setSubmitted(true);
-        setTimeout(() => {
-          navigate("/thank-you");
-        }, 500);
-      }
+      const selectionPayload = ballot.categories.map((category) => ({
+        votingCategory: category.id,
+        group: selections[category.id],
+      }));
+      await submitVote(batch, selectionPayload, ballot.csrfToken);
+      navigate("/thank-you", { state: { batch } });
     } catch (err) {
-      console.error("Failed to submit vote:", err);
-      setError(
-        err.response?.data?.message ||
-          "Failed to submit vote. Please try again.",
-      );
+      setSubmitError(getErrorMessage(err, "Couldn't submit your vote. Please try again."));
+      // The session may have expired or already voted between load and
+      // submit — refresh the ballot so the UI reflects the real state.
+      loadBallot();
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (loadError) {
     return (
       <div className="vote-page">
-        <header className="vote-page__header">
-          <img
-            src={gustoLogo}
-            alt="Gusto College"
-            className="vote-page__logo"
-          />
-        </header>
-        <main className="vote-page__main">
-          <p style={{ textAlign: "center", padding: "40px 20px" }}>
-            Loading voting data...
-          </p>
-        </main>
+        <div className="vote-page__main" style={{ paddingTop: 64, textAlign: "center" }}>
+          <h1 className="vote-page__title">Couldn't load this ballot</h1>
+          <p className="vote-page__subtitle" style={{ marginTop: 12 }}>{loadError}</p>
+          <button type="button" className="vote-submit-btn" style={{ marginTop: 32 }} onClick={loadBallot}>
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
 
+  if (!ballot) {
+    return (
+      <div className="vote-page">
+        <div className="vote-page__main"><LoadingState label="Loading ballot…" /></div>
+      </div>
+    );
+  }
+
+  if (ballot.pageState !== "OPEN") {
+    return <AccessScreen pageState={ballot.pageState} batch={batch} />;
+  }
+
   return (
     <div className="vote-page">
-      {/* Logo header */}
-      <header className="vote-page__header">
-        <img src={gustoLogo} alt="Gusto College" className="vote-page__logo" />
-      </header>
-
-      <main className="vote-page__main">
-        {/* Back button */}
-        <button
-          type="button"
-          id="vote-back-btn"
-          onClick={() => window.history.back()}
-          aria-label="Go back"
-          className="vote-page__back-btn"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5" />
-            <path d="m12 19-7-7 7-7" />
-          </svg>
+      <div className="vote-page__header">
+        <button type="button" className="vote-page__back-btn" onClick={() => navigate(`/welcome/${batch}`)} aria-label="Back">
+          <HiOutlineArrowLeft aria-hidden="true" />
         </button>
+        <img src={gustoLogo} alt="" className="vote-page__logo" />
+      </div>
 
-        <h1 className="vote-page__title">Let&apos;s Vote</h1>
-        <p className="vote-page__subtitle">
-          Choose one group for each category
-        </p>
+      <div className="vote-page__main">
+        <h1 className="vote-page__title">{ballot.project.theme || ballot.project.batch}</h1>
+        <p className="vote-page__subtitle">Pick one group per category, then submit your ballot.</p>
 
-        <img
-          src={heroImg}
-          alt="Student IoT robot project on display"
-          loading="lazy"
-          className="vote-page__hero-img"
-        />
-
-        {error && (
-          <div
-            style={{
-              backgroundColor: "#fee",
-              color: "#c00",
-              padding: "12px",
-              borderRadius: "8px",
-              marginBottom: "16px",
-              fontSize: "14px",
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {/* Category dropdowns */}
         <div className="vote-categories">
-          {categories.map((category) => {
-            const open = openId === category.id;
-            const chosen = selections[category.id];
-            const categoryGroups =
-              allGroups.length > 0
-                ? allGroups
-                : groupsByCategory[category.id] || [];
-            const selectedGroup = categoryGroups.find(
-              (g) => g._id === chosen || g.id === chosen,
-            );
-
+          {ballot.categories.map((category) => {
+            const isOpen = openCategory === category.id;
+            const selectedGroup = ballot.groups.find((g) => g.id === selections[category.id]);
             return (
-              <section className="vote-category" key={category.id}>
+              <div className="vote-category" key={category.id}>
                 <button
                   type="button"
-                  id={`vote-category-${category.id}`}
-                  aria-expanded={open}
-                  onClick={() => setOpenId(open ? null : category.id)}
                   className="vote-category__trigger"
+                  onClick={() => setOpenCategory(isOpen ? null : category.id)}
+                  aria-expanded={isOpen}
                 >
                   <div className="vote-category__info">
-                    <h2 className="vote-category__name">
-                      <span aria-hidden="true">{category.icon}</span>
-                      {category.title}
-                    </h2>
-                    <p className="vote-category__question">
-                      {category.question}
-                    </p>
-                    {chosen && !open && (
-                      <p className="vote-category__selected-label">
-                        Selected: {selectedGroup?.title || selectedGroup?.name}{" "}
-                        {selectedGroup?.description &&
-                          `(${selectedGroup.description})`}
-                      </p>
+                    <div className="vote-category__name">{category.name}</div>
+                    <div className="vote-category__question">{category.description}</div>
+                    {selectedGroup && (
+                      <div className="vote-category__selected-label">
+                        Selected: Group {selectedGroup.groupNumber} · {selectedGroup.title}
+                      </div>
                     )}
                   </div>
-                  <ChevronIcon open={open} />
+                  <FiChevronDown className={`vote-chevron${isOpen ? " vote-chevron--open" : ""}`} aria-hidden="true" />
                 </button>
-
-                <div
-                  className={`vote-category__body ${open ? "vote-category__body--open" : "vote-category__body--closed"}`}
-                >
+                <div className={`vote-category__body${isOpen ? " vote-category__body--open" : " vote-category__body--closed"}`}>
                   <div className="vote-category__body-inner">
                     <div className="vote-category__options">
-                      {categoryGroups.map((group) => {
-                        const groupId = group._id || group.id;
-                        const active = chosen === groupId;
+                      {ballot.groups.map((group) => {
+                        const active = selections[category.id] === group.id;
                         return (
                           <label
-                            key={groupId}
+                            key={group.id}
                             className={`vote-option${active ? " vote-option--active" : ""}`}
                           >
                             <span>
-                              <span className="vote-option__name">
-                                {group.title || group.name}
-                              </span>
-                              <span className="vote-option__team">
-                                {group.description || group.team}
-                              </span>
+                              <span className="vote-option__name">Group {group.groupNumber} · {group.title}</span>
+                              <span className="vote-option__team">{group.members.join(", ")}</span>
                             </span>
                             <input
                               type="radio"
-                              name={category.id}
-                              value={groupId}
-                              checked={active}
-                              onChange={() =>
-                                setSelections((prev) => ({
-                                  ...prev,
-                                  [category.id]: groupId,
-                                }))
-                              }
                               className="vote-option__radio"
+                              name={`category-${category.id}`}
+                              checked={active}
+                              onChange={() => handleSelect(category.id, group.id)}
                             />
                           </label>
                         );
@@ -323,28 +192,22 @@ export default function VotingPage() {
                     </div>
                   </div>
                 </div>
-              </section>
+              </div>
             );
           })}
         </div>
 
-        {/* Submit */}
+        {submitError && <p className="vote-success-msg" style={{ color: "var(--color-danger)" }}>{submitError}</p>}
+
         <button
           type="button"
-          id="vote-submit-btn"
-          disabled={!allAnswered || isSubmitting}
-          onClick={handleVoteSubmit}
           className="vote-submit-btn"
+          disabled={!allAnswered || submitting}
+          onClick={handleSubmit}
         >
-          {isSubmitting ? "Submitting…" : "Vote"}
+          {submitting ? "Submitting…" : "Submit ballot"}
         </button>
-
-        {submitted && (
-          <p className="vote-success-msg">
-            ✅ Thanks! Your vote has been recorded.
-          </p>
-        )}
-      </main>
+      </div>
     </div>
   );
 }

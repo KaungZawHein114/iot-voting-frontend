@@ -1,0 +1,96 @@
+.event-detail__hint {
+  margin-top: 18px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-light);
+  color: var(--color-accent-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.team-row__image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-accent-light));
+}
+
+.team-row__member {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
+
+.results-card {
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.results-card h3 {
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.results-card__desc {
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+}
+
+.results-card__winner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--space-md);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-light);
+  color: var(--color-accent-dark);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.results-card__no-votes {
+  margin-top: var(--space-md);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.results-card__list {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.results-card__list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.results-card__list strong {
+  color: var(--color-text);
+}

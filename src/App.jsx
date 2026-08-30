@@ -5,13 +5,10 @@ import Home from "./pages/Home";
 import WelcomePage from "./pages/welcomePage";
 import ThankYouPage from "./pages/thankyouPage";
 import VotingPage from "./pages/VotingPage";
-import EventDetails from "./pages/EventDetails";
-import GroupDetails from "./pages/GroupDetails";
-import GroupsList from "./pages/GroupsList";
-
+import ProjectPage from "./pages/ProjectPage";
 import HistoryPage from "./pages/HistoryPage";
-import HistoryResultsPage from "./pages/HistoryResultsPage";
 import AboutUs from "./pages/AboutUs";
+import NotFound from "./pages/NotFound";
 
 import "./App.css";
 
@@ -22,17 +19,15 @@ function App() {
         <main className="page-main">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/welcome" element={<WelcomePage />} />
-            <Route path="/thank-you" element={<ThankYouPage />} />
-            <Route path="/vote" element={<VotingPage />} />
-            <Route path="/event" element={<EventDetails />} />
-            <Route path="/events/:eventId" element={<EventDetails />} />
-            <Route path="/groups" element={<GroupsList />} />
-            <Route path="/groups/:groupId" element={<GroupDetails />} />
-
             <Route path="/history" element={<HistoryPage />} />
-            <Route path="/results/:showId" element={<HistoryResultsPage />} />
             <Route path="/about-us" element={<AboutUs />} />
+            <Route path="/projects/:batch" element={<ProjectPage />} />
+
+            <Route path="/welcome/:batch" element={<WelcomePage />} />
+            <Route path="/vote/:batch" element={<VotingPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
+
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </div>

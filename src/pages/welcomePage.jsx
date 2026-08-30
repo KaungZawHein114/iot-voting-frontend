@@ -1,35 +1,58 @@
 // src/pages/welcomePage.jsx
 
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import { FaArrowRight } from "react-icons/fa6";
 
 import "./votingPages.css";
 import logo from "../assets/gusto-logo.jpg";
 import welcomeImage from "../assets/welcomeIOT.jpeg";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { admit } from "../api/voting";
+import { getErrorMessage } from "../api/client";
 
 function WelcomePage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [loading, setLoading] = useState(false);
+  const { batch } = useParams();
+  const [status, setStatus] = useState("checking"); // checking | ready | error
   const [error, setError] = useState("");
+  // The QR token is single-use: reading + clearing the URL fragment must
+  // happen exactly once, even under React 18 StrictMode's dev-only double
+  // effect invocation (the second run would otherwise see an already-cleared
+  // hash and wrongly report the pass as missing).
+  const admissionStarted = useRef(false);
 
-  // Get the voting session token from URL params (passed after QR scan admission)
-  const sessionToken = searchParams.get("token");
+  useEffect(() => {
+    if (admissionStarted.current) return;
+    admissionStarted.current = true;
 
-  const handleStartVote = () => {
-    if (sessionToken) {
-      navigate(`/vote?token=${encodeURIComponent(sessionToken)}`);
-    } else {
-      navigate("/vote");
+    // The QR code encodes the one-time token in the URL fragment (not the
+    // query string) so it never appears in server logs or the Referer
+    // header. Read it once, then strip it from the address bar.
+    const rawToken = window.location.hash.replace(/^#/, "");
+    if (rawToken) {
+      window.history.replaceState(null, "", window.location.pathname);
     }
-  };
 
-  const handleViewGroups = () => {
-    navigate("/groups");
-  };
+    if (!rawToken) {
+      setStatus("error");
+      setError("This link is missing its voting pass. Scan the QR code displayed at the show to vote.");
+      return;
+    }
+
+    // No unmount-cancellation guard here: admissionStarted already
+    // guarantees this call fires exactly once per mounted instance, and
+    // StrictMode's synthetic dev-only cleanup would otherwise poison a
+    // per-invocation "cancelled" flag before the real request resolves.
+    admit(batch, rawToken)
+      .then(() => setStatus("ready"))
+      .catch((err) => {
+        setStatus("error");
+        setError(getErrorMessage(err, "This QR code has expired or was already used."));
+      });
+  }, [batch]);
+
+  const handleStartVote = () => navigate(`/vote/${batch}`);
+  const handleViewGroups = () => navigate(`/projects/${batch}`);
 
   return (
     <main className="voting-screen">
@@ -41,7 +64,7 @@ function WelcomePage() {
         <div className="welcome-heading">
           <p className="welcome-label">Welcome to</p>
 
-          <h1 className="welcome-title">IoT Show 2026</h1>
+          <h1 className="welcome-title">{batch} IoT Show</h1>
 
           <p className="welcome-description">
             Discover innovative IoT projects created by GUSTO students and
@@ -57,7 +80,7 @@ function WelcomePage() {
           />
         </div>
 
-        {error && (
+        {status === "error" && (
           <div
             style={{
               backgroundColor: "#fee",
@@ -66,6 +89,7 @@ function WelcomePage() {
               borderRadius: "8px",
               marginBottom: "16px",
               fontSize: "14px",
+              textAlign: "center",
             }}
           >
             {error}
@@ -77,9 +101,9 @@ function WelcomePage() {
             type="button"
             className="primary-button"
             onClick={handleStartVote}
-            disabled={loading}
+            disabled={status === "checking"}
           >
-            <span>{loading ? "Loading..." : "Let's Vote"}</span>
+            <span>{status === "checking" ? "Checking your pass…" : "Let's Vote"}</span>
 
             <span className="arrow-circle" aria-hidden="true">
               <FaArrowRight />
@@ -90,7 +114,6 @@ function WelcomePage() {
             type="button"
             className="secondary-button"
             onClick={handleViewGroups}
-            disabled={loading}
           >
             View Groups
           </button>

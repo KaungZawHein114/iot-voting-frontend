@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -6,12 +8,11 @@ export default function Footer() {
       <div className="container">
         <div className="footer__inner">
           <p className="footer__copy">
-            © {year} IoT Vote. Built with ⚡ Vite + React.
+            © {year} IoT Vote — GUSTO University
           </p>
           <ul className="footer__links">
-            <li><a href="#features" id="footer-link-features">Features</a></li>
-            <li><a href="#how-it-works" id="footer-link-how">How It Works</a></li>
-            <li><a href="https://github.com" target="_blank" rel="noreferrer" id="footer-link-github">GitHub</a></li>
+            <li><Link to="/history" id="footer-link-history">History</Link></li>
+            <li><Link to="/about-us" id="footer-link-about">About Us</Link></li>
           </ul>
         </div>
       </div>

@@ -1,12 +1,22 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { FiMenu, FiX } from 'react-icons/fi';
+
+const links = [
+  { to: '/', id: 'nav-home', label: 'Home', end: true },
+  { to: '/history', id: 'nav-history', label: 'History' },
+  { to: '/about-us', id: 'nav-about', label: 'About Us' },
+];
 
 export default function Navbar() {
+  const [open, setOpen] = useState(false);
+
   return (
     <header className="navbar">
       <div className="container">
         <div className="navbar__inner">
           {/* Brand */}
-          <NavLink to="/" className="navbar__brand" id="navbar-brand">
+          <NavLink to="/" className="navbar__brand" id="navbar-brand" onClick={() => setOpen(false)}>
             <span className="navbar__brand-icon" aria-hidden="true">⚡</span>
             IoT Vote
           </NavLink>
@@ -14,41 +24,54 @@ export default function Navbar() {
           {/* Nav Links */}
           <nav aria-label="Main navigation">
             <ul className="navbar__nav">
-              <li>
-                <NavLink
-                  to="/"
-                  id="nav-home"
-                  className={({ isActive }) =>
-                    'navbar__link' + (isActive ? ' navbar__link--active' : '')
-                  }
-                >
-                  Home
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/about-us"
-                  id="nav-about"
-                  className={({ isActive }) =>
-                    'navbar__link' + (isActive ? ' navbar__link--active' : '')
-                  }
-                >
-                  About Us
-                </NavLink>
-              </li>
-              <li>
-                <a href="#how-it-works" id="nav-how" className="navbar__link">
-                  How It Works
-                </a>
-              </li>
+              {links.map((link) => (
+                <li key={link.to}>
+                  <NavLink
+                    to={link.to}
+                    id={link.id}
+                    end={link.end}
+                    className={({ isActive }) =>
+                      'navbar__link' + (isActive ? ' navbar__link--active' : '')
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
             </ul>
           </nav>
 
-          {/* CTA */}
-          <a href="#get-started" id="navbar-cta" className="navbar__cta">
-            Get Started
-          </a>
+          <button
+            type="button"
+            className="navbar__menu-btn"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
+          </button>
         </div>
+
+        {open && (
+          <nav aria-label="Mobile navigation" className="navbar__mobile-nav">
+            <ul>
+              {links.map((link) => (
+                <li key={link.to}>
+                  <NavLink
+                    to={link.to}
+                    end={link.end}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      'navbar__link' + (isActive ? ' navbar__link--active' : '')
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </div>
     </header>
   );
