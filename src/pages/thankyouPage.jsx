@@ -1,11 +1,8 @@
 // src/pages/thankyouPage.jsx
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaCheck } from "react-icons/fa6";
-import {
-  HiOutlineArrowLeft,
-  HiOutlineHome,
-} from "react-icons/hi2";
+import { HiOutlineArrowLeft, HiOutlineHome } from "react-icons/hi2";
 
 import "./votingPages.css";
 import logo from "../assets/gusto-logo.jpg";
@@ -13,9 +10,16 @@ import thankYouImage from "../assets/thankyouPeople.jpg";
 
 function ThankYouPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   const handleFinish = () => {
-    navigate("/");
+    // If coming from public voting flow, go back to welcome
+    if (token) {
+      navigate("/welcome");
+    } else {
+      navigate("/");
+    }
   };
 
   const handleBackToEvent = () => {
@@ -26,18 +30,11 @@ function ThankYouPage() {
     <main className="voting-screen">
       <section className="voting-card">
         <header className="thank-you-logo-area">
-          <img
-            src={logo}
-            alt="GUSTO College logo"
-            className="thank-you-logo"
-          />
+          <img src={logo} alt="GUSTO College logo" className="thank-you-logo" />
         </header>
 
         <div className="thank-you-content">
-          <div
-            className="success-icon"
-            aria-label="Vote successfully recorded"
-          >
+          <div className="success-icon" aria-label="Vote successfully recorded">
             <FaCheck aria-hidden="true" />
           </div>
 
@@ -68,10 +65,7 @@ function ThankYouPage() {
             className="primary-button"
             onClick={handleFinish}
           >
-            <HiOutlineHome
-              className="button-icon"
-              aria-hidden="true"
-            />
+            <HiOutlineHome className="button-icon" aria-hidden="true" />
 
             <span>Finish</span>
           </button>
@@ -81,10 +75,7 @@ function ThankYouPage() {
             className="secondary-button"
             onClick={handleBackToEvent}
           >
-            <HiOutlineArrowLeft
-              className="button-icon"
-              aria-hidden="true"
-            />
+            <HiOutlineArrowLeft className="button-icon" aria-hidden="true" />
 
             <span>Back to Event Info</span>
           </button>

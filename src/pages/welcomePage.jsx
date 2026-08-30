@@ -1,17 +1,30 @@
 // src/pages/welcomePage.jsx
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { FaArrowRight } from "react-icons/fa6";
 
 import "./votingPages.css";
 import logo from "../assets/gusto-logo.jpg";
 import welcomeImage from "../assets/welcomeIOT.jpeg";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function WelcomePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Get the voting session token from URL params (passed after QR scan admission)
+  const sessionToken = searchParams.get("token");
 
   const handleStartVote = () => {
-    navigate("/vote");
+    if (sessionToken) {
+      navigate(`/vote?token=${encodeURIComponent(sessionToken)}`);
+    } else {
+      navigate("/vote");
+    }
   };
 
   const handleViewGroups = () => {
@@ -22,11 +35,7 @@ function WelcomePage() {
     <main className="voting-screen">
       <section className="voting-card">
         <header className="welcome-logo-area">
-          <img
-            src={logo}
-            alt="GUSTO College logo"
-            className="welcome-logo"
-          />
+          <img src={logo} alt="GUSTO College logo" className="welcome-logo" />
         </header>
 
         <div className="welcome-heading">
@@ -48,13 +57,29 @@ function WelcomePage() {
           />
         </div>
 
+        {error && (
+          <div
+            style={{
+              backgroundColor: "#fee",
+              color: "#c00",
+              padding: "12px",
+              borderRadius: "8px",
+              marginBottom: "16px",
+              fontSize: "14px",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
         <div className="voting-buttons">
           <button
             type="button"
             className="primary-button"
             onClick={handleStartVote}
+            disabled={loading}
           >
-            <span>Let&apos;s Vote</span>
+            <span>{loading ? "Loading..." : "Let's Vote"}</span>
 
             <span className="arrow-circle" aria-hidden="true">
               <FaArrowRight />
@@ -65,6 +90,7 @@ function WelcomePage() {
             type="button"
             className="secondary-button"
             onClick={handleViewGroups}
+            disabled={loading}
           >
             View Groups
           </button>

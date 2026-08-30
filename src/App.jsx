@@ -1,18 +1,19 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Home from './pages/Home';
-import WelcomePage from './pages/welcomePage';
-import ThankYouPage from './pages/thankyouPage';
-import VotingPage from './pages/VotingPage';
-import EventDetails from './pages/EventDetails';
-import GroupDetails from './pages/GroupDetails';
+import Home from "./pages/Home";
+import WelcomePage from "./pages/welcomePage";
+import ThankYouPage from "./pages/thankyouPage";
+import VotingPage from "./pages/VotingPage";
+import EventDetails from "./pages/EventDetails";
+import GroupDetails from "./pages/GroupDetails";
+import GroupsList from "./pages/GroupsList";
 
 import HistoryPage from "./pages/HistoryPage";
 import HistoryResultsPage from "./pages/HistoryResultsPage";
 import AboutUs from "./pages/AboutUs";
 
-import './App.css';
+import "./App.css";
 
 function App() {
   return (
@@ -26,12 +27,12 @@ function App() {
             <Route path="/vote" element={<VotingPage />} />
             <Route path="/event" element={<EventDetails />} />
             <Route path="/events/:eventId" element={<EventDetails />} />
+            <Route path="/groups" element={<GroupsList />} />
             <Route path="/groups/:groupId" element={<GroupDetails />} />
 
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/results/:showId" element={<HistoryResultsPage />} />
             <Route path="/about-us" element={<AboutUs />} />
-
           </Routes>
         </main>
       </div>
