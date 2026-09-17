@@ -12,6 +12,15 @@
   align-items: center;
 }
 
+/* .container has no explicit width, so as a flex item it would otherwise
+   shrink-to-fit its content (just the brand + menu button on mobile, since
+   the desktop nav list is hidden) and get centered by its own auto margins —
+   clustering the brand and menu button together instead of spreading them
+   to the row's edges. */
+.navbar .container {
+  width: 100%;
+}
+
 .navbar__inner {
   display: flex;
   align-items: center;
@@ -32,13 +41,9 @@
 .navbar__brand-icon {
   width: 32px;
   height: 32px;
-  background: var(--color-primary);
   border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1rem;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .navbar__nav {

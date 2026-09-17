@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FiMenu, FiX } from 'react-icons/fi';
+import gustoLogo from '../assets/gusto-logo.jpg';
 
 const links = [
   { to: '/', id: 'nav-home', label: 'Home', end: true },
@@ -17,7 +18,7 @@ export default function Navbar() {
         <div className="navbar__inner">
           {/* Brand */}
           <NavLink to="/" className="navbar__brand" id="navbar-brand" onClick={() => setOpen(false)}>
-            <span className="navbar__brand-icon" aria-hidden="true">⚡</span>
+            <img src={gustoLogo} alt="" className="navbar__brand-icon" />
             IoT Vote
           </NavLink>
 

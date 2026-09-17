@@ -187,22 +187,31 @@ export default function VotingPage() {
                             key={group.id}
                             className={`vote-option${active ? " vote-option--active" : ""}`}
                           >
-                            <img
-                              className="vote-option__photo"
-                              src={getGroupPhoto(group.groupNumber)}
-                              alt=""
-                            />
-                            <span className="vote-option__text">
+                            <span className="vote-option__row vote-option__row--photo">
+                              <img
+                                className="vote-option__photo"
+                                src={getGroupPhoto(group.groupNumber)}
+                                alt=""
+                              />
+                            </span>
+
+                            <span className="vote-option__row vote-option__row--heading">
                               <span className="vote-option__name">Group {group.groupNumber} · {group.title}</span>
+                              <input
+                                type="radio"
+                                className="vote-option__radio"
+                                name={`category-${category.id}`}
+                                checked={active}
+                                onChange={() => handleSelect(category.id, group.id)}
+                              />
+                            </span>
+
+                            <span className="vote-option__row vote-option__row--details">
+                              {group.description && (
+                                <span className="vote-option__description">{group.description}</span>
+                              )}
                               <span className="vote-option__team">{group.members.join(", ")}</span>
                             </span>
-                            <input
-                              type="radio"
-                              className="vote-option__radio"
-                              name={`category-${category.id}`}
-                              checked={active}
-                              onChange={() => handleSelect(category.id, group.id)}
-                            />
                           </label>
                         );
                       })}
