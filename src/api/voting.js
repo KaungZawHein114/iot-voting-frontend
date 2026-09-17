@@ -12,11 +12,13 @@ export const getBallot = (batch) =>
   client.get(`/voting/${encodeURIComponent(batch)}/ballot`).then((res) => res.data.data);
 
 // selections: [{ votingCategory, group }]
-export const submitVote = (batch, selections, csrfToken) =>
+// voterInfo: { voterName, batchType, batchNumber } — collected after
+// admission for manual post-event review, re-validated server-side.
+export const submitVote = (batch, selections, csrfToken, voterInfo) =>
   client
     .post(
       `/voting/${encodeURIComponent(batch)}/votes`,
-      { selections },
+      { selections, ...voterInfo },
       { headers: { "x-vote-csrf": csrfToken } },
     )
     .then((res) => res.data.data);

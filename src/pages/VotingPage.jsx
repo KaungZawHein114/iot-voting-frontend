@@ -8,6 +8,7 @@ import gustoLogo from "../assets/gusto-logo.png";
 import { getBallot, submitVote } from "../api/voting";
 import { getErrorMessage } from "../api/client";
 import LoadingState from "../components/LoadingState";
+import VoterInfoForm from "../components/VoterInfoForm";
 
 const ACCESS_MESSAGES = {
   NO_ACCESS: {
@@ -59,6 +60,9 @@ export default function VotingPage() {
   const [openCategory, setOpenCategory] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  // Collected once, after admission and before the ballot is shown — for
+  // manual post-event review only (see components/VoterInfoForm.jsx).
+  const [voterInfo, setVoterInfo] = useState(null);
 
   const loadBallot = () => {
     setBallot(null);
@@ -91,7 +95,7 @@ export default function VotingPage() {
         votingCategory: category.id,
         group: selections[category.id],
       }));
-      await submitVote(batch, selectionPayload, ballot.csrfToken);
+      await submitVote(batch, selectionPayload, ballot.csrfToken, voterInfo);
       navigate("/thank-you", { state: { batch } });
     } catch (err) {
       setSubmitError(getErrorMessage(err, "Couldn't submit your vote. Please try again."));
@@ -127,6 +131,10 @@ export default function VotingPage() {
 
   if (ballot.pageState !== "OPEN") {
     return <AccessScreen pageState={ballot.pageState} batch={batch} />;
+  }
+
+  if (!voterInfo) {
+    return <VoterInfoForm onSubmit={setVoterInfo} />;
   }
 
   return (
