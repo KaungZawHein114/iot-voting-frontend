@@ -7,8 +7,10 @@ import "./votingPage.css";
 import gustoLogo from "../assets/gusto-logo.png";
 import { getBallot, submitVote } from "../api/voting";
 import { getErrorMessage } from "../api/client";
+import { getGroupPhoto } from "../assets/groupPhotos";
 import LoadingState from "../components/LoadingState";
 import VoterInfoForm from "../components/VoterInfoForm";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 const ACCESS_MESSAGES = {
   NO_ACCESS: {
@@ -60,6 +62,7 @@ export default function VotingPage() {
   const [openCategory, setOpenCategory] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   // Collected once, after admission and before the ballot is shown — for
   // manual post-event review only (see components/VoterInfoForm.jsx).
   const [voterInfo, setVoterInfo] = useState(null);
@@ -86,8 +89,8 @@ export default function VotingPage() {
     setSelections((prev) => ({ ...prev, [categoryId]: groupId }));
   };
 
-  const handleSubmit = async () => {
-    if (!allAnswered || submitting) return;
+  const performSubmit = async () => {
+    if (submitting) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -104,6 +107,7 @@ export default function VotingPage() {
       loadBallot();
     } finally {
       setSubmitting(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -183,7 +187,12 @@ export default function VotingPage() {
                             key={group.id}
                             className={`vote-option${active ? " vote-option--active" : ""}`}
                           >
-                            <span>
+                            <img
+                              className="vote-option__photo"
+                              src={getGroupPhoto(group.groupNumber)}
+                              alt=""
+                            />
+                            <span className="vote-option__text">
                               <span className="vote-option__name">Group {group.groupNumber} · {group.title}</span>
                               <span className="vote-option__team">{group.members.join(", ")}</span>
                             </span>
@@ -211,11 +220,33 @@ export default function VotingPage() {
           type="button"
           className="vote-submit-btn"
           disabled={!allAnswered || submitting}
-          onClick={handleSubmit}
+          onClick={() => setConfirmOpen(true)}
         >
           {submitting ? "Submitting…" : "Submit ballot"}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Are you sure?"
+        confirmLabel="Yes, submit my vote"
+        busy={submitting}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={performSubmit}
+      >
+        <p>Once submitted, your vote cannot be changed. Please review your selections:</p>
+        <ul className="confirm-dialog__list">
+          {ballot.categories.map((category) => {
+            const group = ballot.groups.find((g) => g.id === selections[category.id]);
+            return (
+              <li key={category.id}>
+                <span className="confirm-dialog__list-label">{category.name}</span>
+                <strong>{group ? `Group ${group.groupNumber} · ${group.title}` : "—"}</strong>
+              </li>
+            );
+          })}
+        </ul>
+      </ConfirmDialog>
     </div>
   );
 }

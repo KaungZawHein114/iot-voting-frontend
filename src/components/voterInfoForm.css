@@ -1,0 +1,118 @@
+.voter-info {
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.voter-info__form {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.voter-info__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.voter-info__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.voter-info__label svg {
+  width: 15px;
+  height: 15px;
+  color: var(--color-primary);
+}
+
+.voter-info__input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.voter-info__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.voter-info__select-wrap {
+  position: relative;
+  display: block;
+}
+
+.voter-info__select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.voter-info__select-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.voter-info__preview {
+  margin: -8px 0 0;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.voter-info__preview strong {
+  color: var(--color-primary);
+}
+
+.voter-info__error {
+  margin: -8px 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+
+.voter-info__warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.1);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #92650a;
+}
+
+.voter-info__warning svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--color-warning);
+}
+
+.voter-info__warning strong {
+  color: #7a5309;
+}

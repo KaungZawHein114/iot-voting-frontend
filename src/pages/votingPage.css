@@ -188,6 +188,19 @@
   border-color: rgba(79, 99, 255, 0.4);
 }
 
+.vote-option__photo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.vote-option__text {
+  flex: 1;
+  min-width: 0;
+}
+
 .vote-option__name {
   display: block;
   font-size: 0.875rem;
@@ -247,4 +260,122 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-accent);
+}
+
+/* ===== Submit confirmation dialog ===== */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(17, 20, 34, 0.55);
+  backdrop-filter: blur(2px);
+  animation: confirm-overlay-in 180ms ease;
+}
+
+@media (min-width: 640px) {
+  .confirm-overlay {
+    align-items: center;
+  }
+}
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: 24px;
+  box-shadow: 0 24px 64px rgba(17, 20, 34, 0.32);
+  animation: confirm-dialog-in 220ms cubic-bezier(0.18, 1, 0.32, 1);
+}
+
+.confirm-dialog__title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.confirm-dialog__body {
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.confirm-dialog__list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  list-style: none;
+}
+
+.confirm-dialog__list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.8rem;
+}
+
+.confirm-dialog__list-label {
+  color: var(--color-text-muted);
+}
+
+.confirm-dialog__list strong {
+  text-align: right;
+  color: var(--color-text);
+}
+
+.confirm-dialog__actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.confirm-dialog__btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.confirm-dialog__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirm-dialog__btn--cancel {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.confirm-dialog__btn--confirm {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(79, 99, 255, 0.3);
+}
+
+.confirm-dialog__btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+@keyframes confirm-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes confirm-dialog-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }

@@ -7,7 +7,8 @@ import StatusBadge from '../components/StatusBadge';
 import LoadingState from '../components/LoadingState';
 import ErrorState from '../components/ErrorState';
 import { getProject, getProjectResults } from '../api/projects';
-import { assetUrl, getErrorMessage } from '../api/client';
+import { getErrorMessage } from '../api/client';
+import { getGroupPhoto } from '../assets/groupPhotos';
 import './eventShowcase.css';
 import './projectPage.css';
 
@@ -21,11 +22,10 @@ const formatLocation = (location) => {
   return parts.length ? parts.join(', ') : 'Location to be announced';
 };
 
-function GroupImage({ images }) {
-  const url = images?.length ? assetUrl(images[0]) : null;
+function GroupImage({ groupNumber }) {
   return (
     <div className="team-row__image">
-      {url ? <img src={url} alt="" /> : <span className="team-row__image-placeholder" aria-hidden="true">📡</span>}
+      <img src={getGroupPhoto(groupNumber)} alt="" />
       <span>Group</span>
     </div>
   );
@@ -34,7 +34,7 @@ function GroupImage({ images }) {
 function GroupRow({ group }) {
   return (
     <article className="team-row">
-      <GroupImage images={group.images} />
+      <GroupImage groupNumber={group.groupNumber} />
       <div className="team-row__info">
         <h2>Group {group.groupNumber} · {group.title}</h2>
         <p>{group.description}</p>
